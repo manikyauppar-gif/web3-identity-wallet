@@ -6,39 +6,25 @@ W3C-compliant DIDs and Verifiable Credentials.
 ## 🖼️ Screenshots
 
 
-![Screen1](screenshots/Screenshot%20(2)
-
-.png)
+![Screen1](screenshots/Screen1.png)
 
 
-![Screen2](screenshots/Screenshot%20(3)
-
-.png)
+![Screen2](screenshots/Screen2.png)
 
 
-![Screen3](screenshots/Screenshot%20(4)
-
-.png)
+![Screen3](screenshots/Screen3.png)
 
 
-![Screen4](screenshots/Screenshot%20(5)
-
-.png)
+![Screen4](screenshots/Screen4.png)
 
 
-![Screen5](screenshots/Screenshot%20(7)
-
-.png)
+![Screen5](screenshots/Screen5.png)
 
 
-![Screen6](screenshots/Screenshot%20(8)
-
-.png)
+![Screen6](screenshots/Screen6.png)
 
 
-![Screen7](screenshots/Screenshot%20(9)
-
-.png)
+![Screen7](screenshots/Screen7.png)
 
 ## 🛠️ Tech Stack
 - Solidity + OpenZeppelin
