@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigiID | Web3 Identity Wallet</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: '#0A0F2C',
+                        primary: '#00D4FF',
+                        accent: '#FFD700',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-navy text-white font-sans antialiased overflow-x-hidden">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-24 right-5 z-50 flex flex-col gap-3"></div>
+
+    <!-- NAVBAR -->
+    <nav id="navbar" class="fixed w-full z-40 transition-all duration-300 glass-nav border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <span class="text-3xl"><i class="fa-solid fa-lock text-primary mr-2"></i></span>
+                    <span class="font-display font-bold text-2xl gradient-text tracking-tight">DigiID</span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#features" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">Features</a>
+                    <a href="#how-it-works" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">How it Works</a>
+                    <a href="#dashboard-section" class="text-gray-300 hover:text-white transition-colors text-sm font-medium hidden dashboard-link">Dashboard</a>
+                    <a href="#institutions" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">Institutions</a>
+                    
+                    <button id="navConnectBtn" class="glow-btn bg-primary/10 text-primary border border-primary/50 px-6 py-2 rounded-full font-medium transition-all hover:bg-primary/20 flex items-center">
+                        <i class="fa-solid fa-wallet mr-2"></i> <span class="btn-text">Connect Wallet</span>
+                    </button>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button class="text-gray-300 hover:text-white focus:outline-none">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section id="hero" class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+        <!-- Particles Background -->
+        <div id="particles-js" class="absolute inset-0 z-0"></div>
+        
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col lg:flex-row items-center gap-12">
+            
+            <!-- Hero Text -->
+            <div class="flex-1 text-center lg:text-left">
+                <div class="inline-block px-4 py-1.5 rounded-full border border-white/10 glass-card text-xs font-medium text-primary mb-6 animate-fade-in-up">
+                    <i class="fa-solid fa-bolt mr-2"></i> The Future of Digital Identity
+                </div>
+                <h1 class="text-5xl lg:text-7xl font-display font-bold leading-tight mb-6 animate-fade-in-up" style="animation-delay: 0.1s;">
+                    Own Your Identity.<br>
+                    <span class="gradient-text">Share Only What Matters.</span>
+                </h1>
+                <p class="text-lg lg:text-xl text-gray-400 mb-8 max-w-2xl mx-auto lg:mx-0 animate-fade-in-up" style="animation-delay: 0.2s;">
+                    Blockchain-secured credentials. ZK-Proof verified. 1-second authentication. Replace centralized honeypots with self-sovereign wallets.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 animate-fade-in-up" style="animation-delay: 0.3s;">
+                    <button id="heroConnectBtn" class="glow-btn bg-primary text-navy w-full sm:w-auto px-8 py-4 rounded-full font-bold transition-all text-lg flex items-center justify-center">
+                        <i class="fa-solid fa-wallet mr-2"></i> <span class="btn-text">Connect Wallet</span>
+                    </button>
+                    <a href="#features" class="glass-card text-white w-full sm:w-auto px-8 py-4 rounded-full font-medium transition-all hover:bg-white/10 text-lg flex items-center justify-center border border-white/10">
+                        Learn More <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Hero Mockup -->
+            <div class="flex-1 relative w-full max-w-md mx-auto perspective-1000 animate-fade-in-up" style="animation-delay: 0.4s;">
+                <div id="floating-card" class="glass-card p-6 rounded-2xl border border-white/20 relative shadow-2xl overflow-hidden preserve-3d group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                    <div class="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl -ml-10 -mb-10"></div>
+                    
+                    <div class="flex justify-between items-start mb-6 relative z-10">
+                        <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
+                            <i class="fa-solid fa-building-columns text-primary text-xl"></i>
+                        </div>
+                        <span class="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-bold rounded-full border border-green-500/30">VERIFIED ✓</span>
+                    </div>
+                    
+                    <h3 class="text-xl font-display font-bold mb-1 relative z-10">Computer Science Degree</h3>
+                    <p class="text-sm text-gray-400 mb-6 relative z-10">Issued by Indian Institute of Technology</p>
+                    
+                    <div class="space-y-4 relative z-10">
+                        <div class="h-2 bg-white/10 rounded-full w-full overflow-hidden">
+                            <div class="h-full bg-gradient w-3/4 shimmer"></div>
+                        </div>
+                        <div class="h-2 bg-white/10 rounded-full w-5/6 overflow-hidden">
+                            <div class="h-full bg-gradient w-full shimmer" style="animation-delay: 0.2s;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-4 border-t border-white/10 flex justify-between items-center relative z-10">
+                        <div class="text-xs text-gray-500 font-mono">DID: polygon:0x8f...39c2</div>
+                        <i class="fa-solid fa-fingerprint text-primary text-2xl opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll Down Arrow -->
+        <a href="#stats" class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-gray-400 hover:text-white transition-colors animate-bounce">
+            <i class="fa-solid fa-chevron-down text-2xl"></i>
+        </a>
+    </section>
+
+    <!-- LIVE STATS BAR -->
+    <section id="stats" class="py-12 border-y border-white/10 bg-black/20 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-white/10">
+                <div class="p-4">
+                    <div class="text-4xl font-display font-bold text-primary mb-2 stat-number" data-target="12483">0</div>
+                    <div class="text-sm text-gray-400 font-medium uppercase tracking-wider">Credentials Issued</div>
+                </div>
+                <div class="p-4">
+                    <div class="text-4xl font-display font-bold text-primary mb-2 stat-number" data-target="3291">0</div>
+                    <div class="text-sm text-gray-400 font-medium uppercase tracking-wider">Verifications Today</div>
+                </div>
+                <div class="p-4">
+                    <div class="text-4xl font-display font-bold text-primary mb-2 stat-number" data-target="47">0</div>
+                    <div class="text-sm text-gray-400 font-medium uppercase tracking-wider">Institutions Onboarded</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES SECTION -->
+    <section id="features" class="py-24 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-display font-bold mb-4">Why Choose <span class="gradient-text">DigiID</span>?</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto text-lg">Next-generation infrastructure for the self-sovereign web. We give power back to the user.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="glass-card p-8 rounded-2xl feature-card group">
+                    <div class="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-lock text-primary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Decentralized Storage</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Your data isn't sitting in a vulnerable central server. Credentials are encrypted and pinned to IPFS, secured by the Polygon blockchain.</p>
+                </div>
+                
+                <!-- Card 2 -->
+                <div class="glass-card p-8 rounded-2xl feature-card group">
+                    <div class="w-14 h-14 rounded-xl bg-purple-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-brain text-purple-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Zero Knowledge Proofs</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Prove you are over 18 without revealing your date of birth. ZK-SNARKs enable ultimate privacy in credential sharing.</p>
+                </div>
+                
+                <!-- Card 3 -->
+                <div class="glass-card p-8 rounded-2xl feature-card group">
+                    <div class="w-14 h-14 rounded-xl bg-yellow-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-bolt text-yellow-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">1-Second Verification</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Verifiers can authenticate proofs instantly via our smart contracts. No more manual background checks or waiting periods.</p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="glass-card p-8 rounded-2xl feature-card group">
+                    <div class="w-14 h-14 rounded-xl bg-green-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-qrcode text-green-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">QR Code Sharing</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Seamlessly share your identity at physical locations. Just generate a temporary ZK-Proof QR code and scan.</p>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="glass-card p-8 rounded-2xl feature-card group">
+                    <div class="w-14 h-14 rounded-xl bg-pink-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-building-columns text-pink-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Institution Portal</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Universities and Governments get a dedicated dashboard to batch-issue standard W3C Verifiable Credentials.</p>
+                </div>
+
+                <!-- Card 6 -->
+                <div class="glass-card p-8 rounded-2xl feature-card group">
+                    <div class="w-14 h-14 rounded-xl bg-blue-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-globe text-blue-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Works Offline</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Your wallet stores proofs locally. You can generate presentation QRs even when you don't have internet access.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS SECTION -->
+    <section id="how-it-works" class="py-24 bg-black/30 relative z-10 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-display font-bold mb-4">How It Works</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto text-lg">Four simple steps to absolute digital sovereignty.</p>
+            </div>
+            
+            <div class="relative">
+                <!-- Connecting Line -->
+                <div class="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-white/10 -translate-y-1/2 z-0">
+                    <div id="timeline-progress" class="h-full bg-gradient w-0 transition-all duration-1000"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
+                    <!-- Step 1 -->
+                    <div class="text-center timeline-step">
+                        <div class="w-16 h-16 mx-auto bg-navy border-2 border-primary rounded-full flex items-center justify-center text-xl font-bold text-primary mb-4 shadow-[0_0_15px_rgba(0,212,255,0.3)]">1</div>
+                        <h4 class="text-lg font-bold mb-2">Connect Wallet</h4>
+                        <p class="text-sm text-gray-400">Link your MetaMask to generate your unique Decentralized Identifier (DID).</p>
+                    </div>
+                    
+                    <!-- Step 2 -->
+                    <div class="text-center timeline-step">
+                        <div class="w-16 h-16 mx-auto bg-navy border-2 border-white/20 rounded-full flex items-center justify-center text-xl font-bold text-gray-400 mb-4 transition-colors">2</div>
+                        <h4 class="text-lg font-bold mb-2">Receive Credentials</h4>
+                        <p class="text-sm text-gray-400">Institutions issue verifiable credentials directly to your encrypted wallet.</p>
+                    </div>
+                    
+                    <!-- Step 3 -->
+                    <div class="text-center timeline-step">
+                        <div class="w-16 h-16 mx-auto bg-navy border-2 border-white/20 rounded-full flex items-center justify-center text-xl font-bold text-gray-400 mb-4 transition-colors">3</div>
+                        <h4 class="text-lg font-bold mb-2">Generate Proof</h4>
+                        <p class="text-sm text-gray-400">Create a ZK-SNARK proof locally to prove facts without revealing raw data.</p>
+                    </div>
+                    
+                    <!-- Step 4 -->
+                    <div class="text-center timeline-step">
+                        <div class="w-16 h-16 mx-auto bg-navy border-2 border-white/20 rounded-full flex items-center justify-center text-xl font-bold text-gray-400 mb-4 transition-colors">4</div>
+                        <h4 class="text-lg font-bold mb-2">Share & Verify</h4>
+                        <p class="text-sm text-gray-400">Share your proof via QR. Verifiers authenticate it on-chain in 1 second.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WALLET DASHBOARD SECTION (Hidden by default) -->
+    <section id="dashboard-section" class="py-24 relative z-10 hidden border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-10">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-display font-bold mb-2">My Vault</h2>
+                    <p class="text-gray-400">Manage your credentials and zero-knowledge proofs.</p>
+                </div>
+                <div class="mt-4 md:mt-0 text-right">
+                    <div class="glass-card px-4 py-2 rounded-lg border border-white/10 inline-block text-sm">
+                        <span class="text-gray-400 mr-2">Wallet:</span>
+                        <span id="dashWalletAddress" class="font-mono text-primary font-medium">0x0...000</span>
+                        <span class="mx-3 text-white/20">|</span>
+                        <span class="text-gray-400 mr-2">Balance:</span>
+                        <span id="dashEthBalance" class="font-mono text-white font-medium">0.00 MATIC</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <!-- Sidebar Actions -->
+                <div class="lg:col-span-1 space-y-4">
+                    <button id="btnIssueCred" class="w-full glass-card hover:bg-white/5 border border-white/10 p-4 rounded-xl flex items-center transition-colors text-left group">
+                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-plus text-primary"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold">Issue New</div>
+                            <div class="text-xs text-gray-400">Add test credential</div>
+                        </div>
+                    </button>
+                    
+                    <button id="btnGenProof" class="w-full glass-card hover:bg-white/5 border border-white/10 p-4 rounded-xl flex items-center transition-colors text-left group">
+                        <div class="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-user-secret text-purple-400"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold">Generate ZK Proof</div>
+                            <div class="text-xs text-gray-400">Selective disclosure</div>
+                        </div>
+                    </button>
+
+                    <button id="btnVerify" class="w-full glass-card hover:bg-white/5 border border-white/10 p-4 rounded-xl flex items-center transition-colors text-left group">
+                        <div class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-check-double text-green-400"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold">Verify Proof</div>
+                            <div class="text-xs text-gray-400">Check authenticity</div>
+                        </div>
+                    </button>
+                </div>
+                
+                <!-- Main Table Area -->
+                <div class="lg:col-span-3 glass-card rounded-2xl border border-white/10 overflow-hidden">
+                    <div class="p-6 border-b border-white/10 flex justify-between items-center">
+                        <h3 class="font-bold text-lg">Active Credentials</h3>
+                        <button id="refreshCredsBtn" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="text-xs text-gray-400 uppercase bg-white/5 border-b border-white/10">
+                                <tr>
+                                    <th class="px-6 py-4 font-medium">Credential Type</th>
+                                    <th class="px-6 py-4 font-medium">Issuer</th>
+                                    <th class="px-6 py-4 font-medium">Date</th>
+                                    <th class="px-6 py-4 font-medium">Status</th>
+                                    <th class="px-6 py-4 font-medium text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="credentialsTableBody" class="divide-y divide-white/5">
+                                <!-- Skeleton Loaders initially -->
+                                <tr class="animate-pulse">
+                                    <td class="px-6 py-4"><div class="h-4 bg-white/10 rounded w-24"></div></td>
+                                    <td class="px-6 py-4"><div class="h-4 bg-white/10 rounded w-32"></div></td>
+                                    <td class="px-6 py-4"><div class="h-4 bg-white/10 rounded w-20"></div></td>
+                                    <td class="px-6 py-4"><div class="h-6 bg-white/10 rounded-full w-16"></div></td>
+                                    <td class="px-6 py-4 text-right"><div class="h-8 bg-white/10 rounded w-8 inline-block"></div></td>
+                                </tr>
+                                <tr class="animate-pulse">
+                                    <td class="px-6 py-4"><div class="h-4 bg-white/10 rounded w-32"></div></td>
+                                    <td class="px-6 py-4"><div class="h-4 bg-white/10 rounded w-28"></div></td>
+                                    <td class="px-6 py-4"><div class="h-4 bg-white/10 rounded w-20"></div></td>
+                                    <td class="px-6 py-4"><div class="h-6 bg-white/10 rounded-full w-16"></div></td>
+                                    <td class="px-6 py-4 text-right"><div class="h-8 bg-white/10 rounded w-8 inline-block"></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Empty State (Hidden by default) -->
+                    <div id="emptyState" class="hidden flex flex-col items-center justify-center py-16 text-center">
+                        <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-folder-open text-gray-500 text-2xl"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-1">No credentials yet</h4>
+                        <p class="text-gray-400 text-sm max-w-sm mb-6">You haven't received any credentials. Issue a test credential to get started.</p>
+                        <button class="glow-btn bg-primary text-navy px-6 py-2 rounded-full font-medium text-sm transition-all" onclick="document.getElementById('btnIssueCred').click()">
+                            Issue First Credential
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODALS -->
+    <!-- Issue Credential Modal -->
+    <div id="issueModal" class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity bg-black/80 backdrop-blur-sm">
+        <div class="glass-card w-full max-w-md border border-white/20 rounded-2xl p-6 relative transform scale-95 transition-transform">
+            <button class="close-modal absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-times text-xl"></i>
+            </button>
+            <h3 class="text-2xl font-display font-bold mb-6">Issue Test Credential</h3>
+            
+            <form id="issueForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Credential Type</label>
+                    <select id="credType" class="w-full bg-navy/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors appearance-none">
+                        <option value="DegreeCertificate">Degree Certificate</option>
+                        <option value="AgeProof">Age Proof (>18)</option>
+                        <option value="IdentityCard">National Identity Card</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Recipient Address</label>
+                    <input type="text" id="credRecipient" class="w-full bg-navy/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors" placeholder="0x..." required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Document Payload (JSON)</label>
+                    <textarea id="credPayload" class="w-full bg-navy/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors font-mono text-sm h-24 resize-none" required>{"name": "John Doe", "degree": "B.Tech CS", "year": "2026"}</textarea>
+                </div>
+                
+                <button type="submit" id="submitIssueBtn" class="w-full glow-btn bg-primary text-navy font-bold rounded-lg px-4 py-3 mt-4 flex justify-center items-center">
+                    <span>Issue to Blockchain</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qrModal" class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity bg-black/80 backdrop-blur-sm">
+        <div class="glass-card w-full max-w-sm border border-white/20 rounded-2xl p-8 relative transform scale-95 transition-transform text-center">
+            <button class="close-modal absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-times text-xl"></i>
+            </button>
+            <h3 class="text-xl font-display font-bold mb-2">Share Credential</h3>
+            <p class="text-sm text-gray-400 mb-6">Scan to verify ZK-Proof on-chain</p>
+            
+            <div class="bg-white p-4 rounded-xl inline-block mb-6 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                <div id="qrcode"></div>
+            </div>
+            
+            <p class="text-xs text-gray-500 font-mono mb-6 break-all" id="qrHashDisplay"></p>
+            
+            <button class="w-full glass-card hover:bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-sm font-medium transition-colors">
+                <i class="fa-solid fa-download mr-2"></i> Download QR
+            </button>
+        </div>
+    </div>
+
+    <!-- Verify Modal -->
+    <div id="verifyModal" class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity bg-black/80 backdrop-blur-sm">
+        <div class="glass-card w-full max-w-md border border-white/20 rounded-2xl p-6 relative transform scale-95 transition-transform">
+            <button class="close-modal absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-times text-xl"></i>
+            </button>
+            <h3 class="text-2xl font-display font-bold mb-6">Verify Proof</h3>
+            
+            <form id="verifyForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Credential Hash</label>
+                    <input type="text" id="verifyHash" class="w-full bg-navy/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary transition-colors font-mono text-sm" placeholder="0x..." required>
+                </div>
+                
+                <button type="submit" id="submitVerifyBtn" class="w-full glow-btn bg-purple-500 text-white font-bold rounded-lg px-4 py-3 mt-4 flex justify-center items-center">
+                    <span>Run On-Chain Verification</span>
+                </button>
+            </form>
+
+            <div id="verifyResult" class="mt-6 hidden p-4 rounded-xl border">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </div>
+
+
+    <!-- INSTITUTIONS SECTION -->
+    <section id="institutions" class="py-20 relative z-10 border-t border-white/5 bg-black/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm font-medium text-gray-400 uppercase tracking-widest mb-8">Trusted by Institutions</p>
+            <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                <div class="text-xl font-display font-bold flex items-center"><i class="fa-solid fa-building-columns mr-2"></i> Delhi University</div>
+                <div class="text-xl font-display font-bold flex items-center"><i class="fa-solid fa-microchip mr-2"></i> IIT Bombay</div>
+                <div class="text-xl font-display font-bold flex items-center"><i class="fa-solid fa-shield-halved mr-2"></i> DigiLocker</div>
+                <div class="text-xl font-display font-bold flex items-center"><i class="fa-solid fa-landmark mr-2"></i> Govt of India</div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <button class="glass-card px-6 py-2 rounded-full text-sm font-medium hover:bg-white/5 transition-colors border border-white/10">
+                    Partner with Us <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-white/10 bg-navy relative z-10 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center mb-4">
+                        <span class="text-2xl"><i class="fa-solid fa-lock text-primary mr-2"></i></span>
+                        <span class="font-display font-bold text-xl gradient-text">DigiID</span>
+                    </div>
+                    <p class="text-sm text-gray-400 leading-relaxed mb-6">Self-sovereign identity infrastructure for the decentralized web.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-primary/20 hover:text-primary transition-colors"><i class="fa-brands fa-twitter"></i></a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-primary/20 hover:text-primary transition-colors"><i class="fa-brands fa-github"></i></a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-primary/20 hover:text-primary transition-colors"><i class="fa-brands fa-discord"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Product</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-primary transition-colors">Wallet Extension</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Institution Portal</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Verifier SDK</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Pricing</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Resources</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-primary transition-colors">Documentation</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Developer API</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">ZK-Proof Guide</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Whitepaper</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Company</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#" class="hover:text-primary transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Careers</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Blog</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-sm text-gray-500">© 2026 DigiID. All rights reserved.</p>
+                <div class="flex items-center space-x-2 text-xs font-mono bg-white/5 px-3 py-1.5 rounded border border-white/10">
+                    <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+                    <span class="text-gray-400">Built on Polygon | Secured by ZK-SNARKs</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- External Libraries -->
+    <!-- Ethers.js v6 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js"></script>
+    <!-- Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <!-- Anime.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <!-- Application Logic -->
+    <script src="script.js"></script>
+</body>
+</html>
