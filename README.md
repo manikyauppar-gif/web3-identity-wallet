@@ -6,37 +6,37 @@ W3C-compliant DIDs and Verifiable Credentials.
 ## 🖼️ Screenshots
 
 
-![Screen1](./screenshots/Screenshot%20(2)
+![Screen1](screenshots/Screenshot%20(2)
 
 .png)
 
 
-![Screen2](./screenshots/Screenshot%20(3)
+![Screen2](screenshots/Screenshot%20(3)
 
 .png)
 
 
-![Screen3](./screenshots/Screenshot%20(4)
+![Screen3](screenshots/Screenshot%20(4)
 
 .png)
 
 
-![Screen4](./screenshots/Screenshot%20(5)
+![Screen4](screenshots/Screenshot%20(5)
 
 .png)
 
 
-![Screen5](./screenshots/Screenshot%20(7)
+![Screen5](screenshots/Screenshot%20(7)
 
 .png)
 
 
-![Screen6](./screenshots/Screenshot%20(8)
+![Screen6](screenshots/Screenshot%20(8)
 
 .png)
 
 
-![Screen7](./screenshots/Screenshot%20(9)
+![Screen7](screenshots/Screenshot%20(9)
 
 .png)
 
