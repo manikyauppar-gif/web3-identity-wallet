@@ -301,8 +301,8 @@ app.get('/api/credentials/user/:address', async (req, res, next) => {
     }
 });
 
-// Catch-all route to serve index.html for any unhandled non-API route
-app.get('*', (req, res, next) => {
+// Express 5 Compatible Catch-all Middleware (Serves index.html for non-API routes)
+app.use((req, res, next) => {
     if (req.path.startsWith('/api/')) {
         return next();
     }
