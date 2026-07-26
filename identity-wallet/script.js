@@ -1,7 +1,7 @@
 // script.js
 
 const CONTRACT_ADDRESS = "0x010a003cC9664C281bA9b31bD2a20e4BCb9c203B"; // Update this after deploying new contract!
-const API_BASE = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1') ? '/api' : 'http://localhost:3000/api';
+const API_BASE = '/api';
 
 const CONTRACT_ABI = [
     "function registerDID(string memory did) external",
