@@ -24,13 +24,20 @@ app.use(helmet({
 }));
 app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static(__dirname)); // Serve static files from the project directory
+
+// Serve static files (index.html, script.js, style.css) from the project directory
+app.use(express.static(__dirname));
+
+// Explicitly serve index.html on the root path
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100 // limit each IP to 100 requests per windowMs
 });
-app.use(limiter);
+app.use('/api/', limiter); // Apply rate limiting to API routes
 
 // MongoDB Schemas
 const userSchema = new mongoose.Schema({
@@ -86,7 +93,7 @@ function authMiddleware(req, res, next) {
 
 // Routes
 
-// --- BEGIN NEW API ROUTES ---
+// --- BEGIN API ROUTES ---
 
 // Simple in-memory storage for identities
 const identities = {};
@@ -136,8 +143,6 @@ app.get('/api/getIdentity', (req, res) => {
     }
 });
 
-// --- END NEW API ROUTES ---
-
 // 1. Wallet Login
 app.post('/api/auth/wallet-login', async (req, res, next) => {
     try {
@@ -185,7 +190,7 @@ app.post('/api/credentials/issue', authMiddleware, async (req, res, next) => {
         const payloadString = JSON.stringify(payload);
         const credHash = ethers.keccak256(ethers.toUtf8Bytes(payloadString + Date.now().toString()));
         
-        // MOCK IPFS Upload (Since no Pinata key provided)
+        // MOCK IPFS Upload
         const ipfsCID = "QmMockHash" + Math.floor(Math.random() * 1000000);
         
         // Save to DB (or memory)
@@ -294,6 +299,14 @@ app.get('/api/credentials/user/:address', async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+});
+
+// Catch-all route to serve index.html for any unhandled non-API route
+app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+        return next();
+    }
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Global Error Handler
