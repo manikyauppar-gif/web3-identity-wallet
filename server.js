@@ -1,8 +1,8 @@
-// Wrapper to run the identity-wallet server from the root directory
+// 1. If it's a pure API server, add a landing health-check route:
+app.get('/', (req, res) => {
+  res.send('🚀 Web3 Identity Wallet API is Live and Running!');
+});
+
+// OR 2. If you have frontend HTML files in a folder (e.g., 'public'):
 const path = require('path');
-
-// Change working directory to 'identity-wallet' so dotenv and static paths resolve correctly
-process.chdir(path.join(__dirname, 'identity-wallet'));
-
-// Require server.js relative to the new working directory
-require('./server.js');
+app.use(express.static(path.join(__dirname, 'public')));
