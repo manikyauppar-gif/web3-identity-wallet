@@ -20,15 +20,15 @@ const mockVerifications = [];
 
 // Middleware
 app.use(helmet({
-    contentSecurityPolicy: false // Disable CSP so CDN files loaded in index.html (Tailwind, FontAwesome, Ethers, etc.) are not blocked
+    contentSecurityPolicy: false // Disable CSP so CDN files loaded in index.html are not blocked
 }));
 app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '10mb' }));
 
-// Serve static files (index.html, script.js, style.css) from the project directory
+// Serve static files (index.html, script.js, style.css) from current directory
 app.use(express.static(__dirname));
 
-// Explicitly serve index.html on the root path
+// Explicitly serve index.html on root path
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -37,7 +37,7 @@ const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100 // limit each IP to 100 requests per windowMs
 });
-app.use('/api/', limiter); // Apply rate limiting to API routes
+app.use('/api/', limiter);
 
 // MongoDB Schemas
 const userSchema = new mongoose.Schema({
@@ -91,11 +91,8 @@ function authMiddleware(req, res, next) {
     }
 }
 
-// Routes
+// --- API ROUTES ---
 
-// --- BEGIN API ROUTES ---
-
-// Simple in-memory storage for identities
 const identities = {};
 
 // GET /api/status -> returns backend status
@@ -111,7 +108,6 @@ app.post('/api/saveIdentity', (req, res) => {
             return res.status(400).json({ error: "walletAddress is required" });
         }
         
-        // Store in memory
         identities[walletAddress.toLowerCase()] = {
             name: name || "Web3 User",
             walletAddress: walletAddress.toLowerCase(),
@@ -148,13 +144,11 @@ app.post('/api/auth/wallet-login', async (req, res, next) => {
     try {
         const { address, signature, message } = req.body;
         
-        // Verify signature
         const recoveredAddress = ethers.verifyMessage(message, signature);
         if (recoveredAddress.toLowerCase() !== address.toLowerCase()) {
             return res.status(401).json({ error: 'Invalid signature' });
         }
         
-        // Upsert User
         let user;
         if (mongoose.connection.readyState === 1) {
             user = await User.findOne({ address: address.toLowerCase() });
@@ -172,7 +166,6 @@ app.post('/api/auth/wallet-login', async (req, res, next) => {
             mockUsers[address.toLowerCase()] = user;
         }
         
-        // Generate JWT
         const token = jwt.sign({ address: user.address, id: user._id }, JWT_SECRET, { expiresIn: '24h' });
         
         res.json({ success: true, token, user });
@@ -186,14 +179,10 @@ app.post('/api/credentials/issue', authMiddleware, async (req, res, next) => {
     try {
         const { recipientDID, credentialType, payload } = req.body;
         
-        // Generate Hash
         const payloadString = JSON.stringify(payload);
         const credHash = ethers.keccak256(ethers.toUtf8Bytes(payloadString + Date.now().toString()));
-        
-        // MOCK IPFS Upload
         const ipfsCID = "QmMockHash" + Math.floor(Math.random() * 1000000);
         
-        // Save to DB (or memory)
         const credData = {
             hash: credHash,
             issuer: req.user.address,
@@ -232,7 +221,6 @@ app.post('/api/credentials/verify', async (req, res, next) => {
             return res.json({ isValid: false, reason: "Not found in off-chain DB" });
         }
         
-        // Save verification to DB (or memory)
         const verifyData = {
             credentialHash,
             verifier: verifierAddress || 'anonymous',
@@ -277,32 +265,31 @@ app.get('/api/analytics/stats', async (req, res, next) => {
     }
 });
 
-// 5. Get User Credentials Endpoint
+// 5. Get User Credentials Endpoint (Flexible Matching)
 app.get('/api/credentials/user/:address', async (req, res, next) => {
     try {
         const address = req.params.address.toLowerCase();
         let creds;
+
         if (mongoose.connection.readyState === 1) {
             creds = await Credential.find({
-                $or: [
-                    { recipient: address },
-                    { recipient: `did:polygon:${address}` }
-                ]
+                recipient: new RegExp(address, 'i')
             });
         } else {
-            creds = Object.values(mockCredentials).filter(c => 
-                c.recipient.toLowerCase() === address || 
-                c.recipient.toLowerCase() === `did:polygon:${address}`
-            );
+            creds = Object.values(mockCredentials).filter(c => {
+                const recipient = (c.recipient || '').toLowerCase();
+                return recipient.includes(address);
+            });
         }
+
         res.json({ success: true, credentials: creds });
     } catch (error) {
         next(error);
     }
 });
 
-// Express 5 Compatible Catch-all Middleware (Serves index.html for non-API routes)
-app.use((req, res, next) => {
+// Catch-all route to serve index.html for non-API requests
+app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api/')) {
         return next();
     }

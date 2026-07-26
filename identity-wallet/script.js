@@ -1,6 +1,6 @@
 // script.js
 
-const CONTRACT_ADDRESS = "0x010a003cC9664C281bA9b31bD2a20e4BCb9c203B"; // Update this after deploying new contract!
+const CONTRACT_ADDRESS = "0x010a003cC9664C281bA9b31bD2a20e4BCb9c203B";
 const API_BASE = '/api';
 
 const CONTRACT_ABI = [
@@ -11,7 +11,7 @@ const CONTRACT_ABI = [
     "function didRegistry(address user) external view returns (string memory did, address owner, uint256 createdAt, uint256 updatedAt, bool isActive)"
 ];
 
-// 8. LOCAL STATE MANAGEMENT
+// LOCAL STATE MANAGEMENT
 const AppState = {
     wallet: null,
     credentials: [],
@@ -40,7 +40,6 @@ const AppState = {
             document.getElementById('dashboard-section').classList.remove('hidden');
             document.getElementById('dashWalletAddress').innerText = this.wallet.substring(0, 6) + '...' + this.wallet.substring(38);
             
-            // Fetch identity and display it on dashboard
             fetch(`${API_BASE}/getIdentity?walletAddress=${this.wallet}`)
                 .then(res => res.json())
                 .then(data => {
@@ -62,7 +61,6 @@ const AppState = {
                 })
                 .catch(err => console.error("Error fetching identity:", err));
             
-            // Re-render credentials table if credentials exist
             renderCredentialsTable();
         } else {
             document.getElementById('navConnectBtn').innerHTML = '<i class="fa-solid fa-wallet mr-2"></i> Connect Wallet';
@@ -87,7 +85,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     initScrollAnimations();
     startNumberCounters();
     
-    // Check backend status on page load
     try {
         const response = await fetch(`${API_BASE}/status`);
         const data = await response.json();
@@ -98,11 +95,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         showToast("Backend connection failed. Is the server running?", 'error');
     }
     
-    // Check local storage for existing session
     const savedWallet = localStorage.getItem('digiid_wallet');
     const savedToken = localStorage.getItem('digiid_jwt');
     if (savedWallet && savedToken) {
-        // Soft connect
         try {
             if (window.ethereum && savedWallet !== '0x742d35Cc6634C0532925a3b844Bc454e4438f44e') {
                 provider = new ethers.BrowserProvider(window.ethereum);
@@ -129,7 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// 7. NOTIFICATIONS SYSTEM
+// NOTIFICATIONS SYSTEM
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
@@ -152,7 +147,7 @@ function showToast(message, type = 'info') {
     }, 4000);
 }
 
-// 1. METAMASK CONNECTION
+// METAMASK CONNECTION
 async function connectWallet() {
     if (typeof window.ethereum === 'undefined') {
         showToast('MetaMask not detected. Connecting with a demo wallet.', 'warning');
@@ -168,7 +163,6 @@ async function connectWallet() {
         
         document.getElementById('dashEthBalance').innerText = '100.0000 MATIC (Demo)';
         
-        // Save Identity to backend
         try {
             await fetch(`${API_BASE}/saveIdentity`, {
                 method: 'POST',
@@ -180,7 +174,6 @@ async function connectWallet() {
         }
         
         getMyCredentials();
-        
         showToast('Connected to Demo Wallet', 'success');
         
         setTimeout(() => {
@@ -194,52 +187,37 @@ async function connectWallet() {
         await provider.send("eth_requestAccounts", []);
         signer = await provider.getSigner();
         
-        const network = await provider.getNetwork();
-        console.log("Connected to chain:", network.chainId);
-        
         const address = await signer.getAddress();
         contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
         
-        // Backend Login
         await loginWithWallet(address);
         
-        // Register DID on-chain if not already registered
         try {
             const didDoc = await contract.didRegistry(address);
             if (!didDoc.isActive) {
-                showToast('Registering DID (Decentralized Identifier) on-chain...', 'info');
+                showToast('Registering DID on-chain...', 'info');
                 const tx = await contract.registerDID(`did:polygon:${address}`);
                 await tx.wait();
-                showToast('DID Registered successfully on-chain!', 'success');
+                showToast('DID Registered on-chain!', 'success');
             }
         } catch (contractErr) {
-            console.warn("Could not verify or register DID on-chain (is contract deployed?):", contractErr);
+            console.warn("DID check/register skipped:", contractErr);
         }
         
-        // Save Identity to backend
         try {
-            const saveRes = await fetch(`${API_BASE}/saveIdentity`, {
+            await fetch(`${API_BASE}/saveIdentity`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: "Web3 Explorer", walletAddress: address })
             });
-            const saveData = await saveRes.json();
-            if (saveRes.ok) {
-                console.log("Identity saved successfully:", saveData);
-            } else {
-                console.error("Failed to save identity:", saveData.error);
-                showToast("Failed to save identity to backend", "error");
-            }
         } catch (error) {
-            console.error("Error saving identity to backend:", error);
-            showToast("Error connecting to backend", "error");
+            console.error("Error saving identity:", error);
         }
         
         AppState.set('wallet', address);
         AppState.set('isConnected', true);
         
         showToast('Wallet connected successfully', 'success');
-        
         getEthBalance(address);
         getMyCredentials();
         
@@ -274,7 +252,6 @@ async function getEthBalance(address) {
     document.getElementById('dashEthBalance').innerText = parseFloat(ethBalance).toFixed(4) + ' MATIC';
 }
 
-// 4. BACKEND API CALLS
 async function apiCall(endpoint, method = 'GET', body = null) {
     const headers = { 'Content-Type': 'application/json' };
     if (AppState.jwtToken) {
@@ -311,52 +288,53 @@ async function loginWithWallet(address) {
     }
 }
 
-// 3. CONTRACT FUNCTIONS
+// FETCH CREDENTIALS (COMBINED BACKEND & CONTRACT)
 async function getMyCredentials() {
     if (!AppState.wallet) return;
     
-    let success = false;
+    const userAddr = AppState.wallet.toLowerCase();
+    let combinedCreds = [];
     
+    // 1. Fetch from Backend API
+    try {
+        const res = await apiCall(`/credentials/user/${userAddr}`, 'GET');
+        if (res.status === 200 && res.data && res.data.credentials) {
+            const apiCreds = res.data.credentials.map(c => ({
+                hash: c.hash,
+                issuer: c.issuer,
+                type: c.type || c.credentialType,
+                date: new Date(c.issuedAt).toLocaleDateString(),
+                status: c.isRevoked ? 'Revoked' : 'Active'
+            }));
+            combinedCreds.push(...apiCreds);
+        }
+    } catch (apiError) {
+        console.error("Backend credentials fetch failed:", apiError);
+    }
+
+    // 2. Fetch from On-Chain Contract if available
     if (contract) {
         try {
-            // First check backend/cache, or directly on-chain
-            const creds = await contract.getCredentials(AppState.wallet);
-            
-            const formattedCreds = creds.map(c => ({
+            const chainCreds = await contract.getCredentials(AppState.wallet);
+            const formattedChain = chainCreds.map(c => ({
                 hash: c.credentialHash,
                 issuer: c.issuer,
                 type: c.credentialType,
                 date: new Date(Number(c.issuedAt) * 1000).toLocaleDateString(),
                 status: c.isRevoked ? 'Revoked' : 'Active'
             }));
-            
-            AppState.set('credentials', formattedCreds);
-            success = true;
-        } catch (error) {
-            console.warn("On-chain credentials fetch failed, falling back to backend:", error);
+
+            formattedChain.forEach(chainItem => {
+                if (!combinedCreds.some(item => item.hash === chainItem.hash)) {
+                    combinedCreds.push(chainItem);
+                }
+            });
+        } catch (contractError) {
+            console.warn("On-chain fetch skipped or contract not found:", contractError);
         }
     }
-    
-    if (!success) {
-        try {
-            const res = await apiCall(`/credentials/user/${AppState.wallet}`, 'GET');
-            if (res.status === 200 && res.data && res.data.credentials) {
-                const formattedCreds = res.data.credentials.map(c => ({
-                    hash: c.hash,
-                    issuer: c.issuer,
-                    type: c.type || c.credentialType,
-                    date: new Date(c.issuedAt).toLocaleDateString(),
-                    status: c.isRevoked ? 'Revoked' : 'Active'
-                }));
-                AppState.set('credentials', formattedCreds);
-            } else {
-                AppState.set('credentials', []);
-            }
-        } catch (apiError) {
-            console.error("Backend credentials fetch failed:", apiError);
-            AppState.set('credentials', []);
-        }
-    }
+
+    AppState.set('credentials', combinedCreds);
 }
 
 function renderCredentialsTable() {
@@ -420,10 +398,7 @@ document.getElementById('issueForm').addEventListener('submit', async (e) => {
         submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Processing...';
         
         let success = false;
-        let credHash = '';
-        
-        // Generate pseudo-random hash
-        credHash = ethers.keccak256(ethers.toUtf8Bytes(JSON.stringify(parsedPayload) + Date.now().toString()));
+        let credHash = ethers.keccak256(ethers.toUtf8Bytes(JSON.stringify(parsedPayload) + Date.now().toString()));
         const mockIpfsCID = "QmMockIPFSHash" + Math.floor(Math.random() * 1000000);
         
         if (contract) {
@@ -474,7 +449,6 @@ document.getElementById('btnVerify').addEventListener('click', () => {
     setTimeout(() => document.getElementById('verifyModal').classList.add('opacity-100'), 10);
 });
 
-// ZK-Proof Generation Instruction Flow
 document.getElementById('btnGenProof').addEventListener('click', () => {
     showToast('Click the QR code icon next to any credential to generate a selective ZK-proof.', 'info');
 });
@@ -547,7 +521,7 @@ function closeModals() {
     });
 }
 
-// 5. QR CODE GENERATION
+// QR CODE GENERATION
 window.generateQR = function(hash) {
     document.getElementById('qrModal').classList.remove('hidden');
     setTimeout(() => document.getElementById('qrModal').classList.add('opacity-100'), 10);
@@ -573,7 +547,7 @@ document.getElementById('refreshCredsBtn').addEventListener('click', () => {
     getMyCredentials();
 });
 
-// 6. ANIMATIONS
+// ANIMATIONS
 function initParticles() {
     if (window.particlesJS) {
         particlesJS("particles-js", {
@@ -607,7 +581,6 @@ function startNumberCounters() {
             easing: 'easeOutExpo',
             duration: 3000,
             update: function(a) {
-                // Add commas for thousands
                 if (a.animations && a.animations[0]) {
                     num.innerHTML = parseInt(a.animations[0].currentValue).toLocaleString();
                 }
@@ -630,7 +603,6 @@ function initScrollAnimations() {
     const timeline = document.getElementById('timeline-progress');
     if(timeline) observer.observe(timeline);
     
-    // Navbar scroll effect
     window.addEventListener('scroll', () => {
         const nav = document.getElementById('navbar');
         if (window.scrollY > 50) {
